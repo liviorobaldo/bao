@@ -1,0 +1,44 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix uno:  <https://w3id.org/unique-name-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+
+####################################################################################################################################################################################
+# Classes and Properties
+####################################################################################################################################################################################
+
+uno:UniqueName rdf:type rdfs:Class.
+uno:sameAs rdf:type rdf:Property.
+
+
+####################################################################################################################################################################################
+# SHACL-SPARQL Rules
+####################################################################################################################################################################################
+
+uno:EmbeddedPrefixes sh:declare 
+	[sh:prefix"rdf";sh:namespace"http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI],
+	[sh:prefix"rdfs";sh:namespace"http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI],
+	[sh:prefix"bao";sh:namespace"https://w3id.org/boolean-algebra-ontology#"^^xsd:anyURI],
+	[sh:prefix"uno";sh:namespace"https://w3id.org/unique-name-ontology#"^^xsd:anyURI].
+
+# If two IRIs are related by uno:sameAs, but one of them is also an instance of uno:UniqueName, the negation of the uno:sameAs statement is also asserted, thereby triggering a contradiction through the inference rules of the Boolean Algebra Ontology.
+[rdf:type sh:NodeShape; 
+	sh:targetNode uno:sameAs;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes uno:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{<<?i1 uno:sameAs ?i2>> rdf:type bao:False}
+						WHERE{?i1 $this ?i2. {?i1 rdf:type uno:UniqueName}UNION{?i2 rdf:type uno:UniqueName}}"""]].
+
+
+
+####################################################################################################################################################################################
+# SHACL-SPARQL rule implementing rdfs:subClassOf inference.
+# The rule below enforces rdfs:subClassOf inference, which is required by the Unique Name Ontology example. Strictly speaking, this rule should not be defined in this file
+# (i.e., in the TBox of the UNO ontology), but rather in a separate file dedicated to RDFS. It has been included here solely for practical reasons.
+####################################################################################################################################################################################
+[rdf:type sh:NodeShape; sh:targetClass rdfs:Resource;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes uno:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{?i rdf:type ?c2}WHERE{?i rdf:type ?c1. ?c1 rdfs:subClassOf+ ?c2.}"""]].

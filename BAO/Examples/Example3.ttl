@@ -1,0 +1,39 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# The rule at the bottom of this file classifies as "Ignore" every statement involving a subject or object that participates in a contradiction.
+# Therefore, since the triple ":Bill :hasWife :Mary" is asserted to be both "bao:True" and "bao:False", a contradiction is inferred.
+# As a result, all facts involving either Bill or Mary (i.e., the facts marked with "#" on the right) are classified as "Ignore".
+
+
+<<:Bill :hasWife :Mary>> rdf:type bao:True.
+<<:Bill :hasWife :Mary>> rdf:type bao:False.
+:Bill :lives-in :Rome. #
+:Jack :lives-in :Madrid.
+:Mary :lives-in :Paris. #
+:John :lives-in :Berlin.
+:Jack :loves :Mary. #
+:Mary :loves :Bill. #
+:Jack :hates :John.
+
+
+# This rule classifies as "Ignore" every statement involving a subject or object that participates in a contradiction.
+[rdf:type sh:NodeShape;
+	sh:targetNode bao:is-in-contradiction-with;
+	sh:rule[rdf:type sh:SPARQLRule; 
+		sh:prefixes[sh:declare[sh:prefix"rdf";sh:namespace"http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI],[sh:prefix"";sh:namespace"http://www.example.org#"^^xsd:anyURI]];
+		sh:construct """CONSTRUCT{?i rdf:type :Ignore}
+						WHERE{<<<<?s ?p ?o>> rdf:type ?tv1>> $this <<<<?s ?p ?o>> rdf:type ?tv2>>.
+							  {?s ?p1 ?o1. BIND(<<?s ?p1 ?o1>> AS ?i)}UNION
+							  {?s1 ?p1 ?s. BIND(<<?s1 ?p1 ?s>> AS ?i)}UNION
+							  {?o ?p1 ?o1. BIND(<<?o ?p1 ?o1>> AS ?i)}UNION
+							  {?s1 ?p1 ?o. BIND(<<?s1 ?p1 ?o>> AS ?i)}}"""]].
+						
+						
+						
+	

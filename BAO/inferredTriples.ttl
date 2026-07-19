@@ -1,0 +1,35 @@
+@prefix : <http://www.example.org#> .
+@prefix bao: <https://w3id.org/boolean-algebra-ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix uno: <https://w3id.org/unique-name-ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:Bill   rdf:type  :Horse ;
+        :hasWife  :Mary .
+
+<< << :Bill :hasWife :Mary >> rdf:type bao:True >>
+        bao:is-in-contradiction-with  << << :Bill :hasWife :Mary >> rdf:type bao:False >> ;
+        rdf:type                      bao:False .
+
+<< :Bill rdf:type :Horse >>
+        rdf:type  bao:False .
+
+<< << << :Bill rdf:type :Horse >> rdf:type bao:False >> rdf:type bao:False >>
+        bao:is-in-contradiction-with  << << << :Bill rdf:type :Horse >> rdf:type bao:False >> rdf:type bao:True >> .
+
+<< << :Bill :hasWife :Mary >> rdf:type bao:False >>
+        bao:is-in-contradiction-with  << << :Bill :hasWife :Mary >> rdf:type bao:True >> .
+
+<< << :Bill rdf:type :Horse >> rdf:type bao:False >>
+        bao:is-in-contradiction-with  << << :Bill rdf:type :Horse >> rdf:type bao:True >> ;
+        rdf:type                      bao:False .
+
+<< << :Bill rdf:type :Horse >> rdf:type bao:True >>
+        bao:is-in-contradiction-with  << << :Bill rdf:type :Horse >> rdf:type bao:False >> .
+
+<< :Bill :hasWife :Mary >>
+        rdf:type  bao:False .
+
+<< << << :Bill rdf:type :Horse >> rdf:type bao:False >> rdf:type bao:True >>
+        bao:is-in-contradiction-with  << << << :Bill rdf:type :Horse >> rdf:type bao:False >> rdf:type bao:False >> .

@@ -1,0 +1,20 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# The disjunction below states that Bill is married to Mary, Sue, or Jenny. The two triples following the disjunction state that Bill is not married to Sue and Jenny, respectively. Therefore, by disjunctive syllogism, it is inferred that Bill is married to Mary. The additional SPARQL rules in the code remove all redundant triples.
+
+# Note: if, instead, you add a triple stating that one of the three women is indeed Bill's wife, e.g., "<<:Bill :hasWife :Mary>> rdf:type bao:True." or simply ":Bill :hasWife :Mary.", it is inferred that the first disjunction entails T, represented as a disjunction with zero disjuncts. Both this disjunction and the original one are then deleted by the additional SPARQL rules in the Java code, as in Example 5.
+
+[a bao:Disjunction;
+bao:has-disjunct << <<:Bill :hasWife :Mary>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:True>>].
+
+<<:Bill :hasWife :Sue>> rdf:type bao:False.
+<<:Bill :hasWife :Jenny>> rdf:type bao:False.
+

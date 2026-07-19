@@ -1,0 +1,154 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+
+####################################################################################################################################################################################
+# Classes and Properties
+####################################################################################################################################################################################
+
+bao:True rdf:type rdfs:Class.
+bao:False rdf:type rdfs:Class.
+
+bao:is-in-contradiction-with rdf:type rdf:Property.
+
+bao:Disjunction rdf:type rdfs:Class.
+bao:has-disjunct rdf:type rdf:Property.
+
+
+####################################################################################################################################################################################
+# SHACL Shapes
+####################################################################################################################################################################################
+
+bao:EmbeddedPrefixes sh:declare 
+	[sh:prefix"rdf";sh:namespace"http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI],
+	[sh:prefix"rdfs";sh:namespace"http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI],
+	[sh:prefix"bao";sh:namespace"https://w3id.org/boolean-algebra-ontology#"^^xsd:anyURI].
+
+
+# Every instance of bao:True and bao:False must be a reified statement, i.e., an instance of rdf:Statement, and must specify the three reification properties: rdf:subject, rdf:predicate, and rdf:object.
+[rdf:type sh:NodeShape;
+    sh:targetClass bao:True; sh:targetClass bao:False;
+    sh:class rdf:Statement;
+    sh:property [sh:path rdf:subject; sh:minCount 1; sh:maxCount 1];
+    sh:property [sh:path rdf:predicate; sh:minCount 1; sh:maxCount 1];
+    sh:property [sh:path rdf:object; sh:minCount 1; sh:maxCount 1]].
+
+
+# The following shapes validate the bao:is-in-contradiction-with property, which can only hold between different reifications of the same underlying triple, where one is asserted as bao:True and the other as bao:False.
+[rdf:type sh:NodeShape ;
+    sh:targetSubjectsOf bao:is-in-contradiction-with ;
+    sh:sparql[sh:prefixes bao:EmbeddedPrefixes; rdf:type sh:SPARQLConstraint ;
+        sh:message "The subject and object of 'bao:is-in-contradiction-with' must be two nested triples referring to the same underlying RDF triple, differing only in their outer truth value: exactly one must be bao:True and the other bao:False.";
+		sh:select """SELECT $this ?other
+					 WHERE 
+					 {
+						$this bao:is-in-contradiction-with ?other.
+						FILTER(NOT EXISTS{$this rdf:type rdf:Statement; rdf:subject ?sThis; rdf:predicate rdf:type; rdf:object ?oThis. 
+										  ?other rdf:type rdf:Statement; rdf:subject ?sOther; rdf:predicate rdf:type; rdf:object ?oOther.
+										  ?sThis rdf:subject ?s; rdf:predicate ?p; rdf:object ?o. 
+										  ?sOther rdf:subject ?s; rdf:predicate ?p; rdf:object ?o.
+										  FILTER(((?oThis=bao:True)&&(?oOther=bao:False))||((?oThis=bao:False)&&(?oOther=bao:True)))})
+					 }"""]].
+
+
+# The following shape validates the bao:has-disjunct property, which may only relate instances of bao:Disjunction to the reification of triples asserting that the reification of another triple is an instance of either bao:True or bao:False.
+[rdf:type sh:NodeShape ;
+    sh:targetSubjectsOf bao:has-disjunct ;
+    sh:sparql[sh:prefixes bao:EmbeddedPrefixes; rdf:type sh:SPARQLConstraint ;
+        sh:message "The subject and object of 'bao:has-disjunct' must respectively be an instance of bao:Disjunction and the reification of triples asserting that the reification of another triple is an instance of either bao:True or bao:False.";
+		sh:select """SELECT $this
+					 WHERE 
+					 {
+						$this bao:has-disjunct ?d.
+						FILTER(NOT EXISTS{$this rdf:type bao:Disjunction.
+										  ?d rdf:type rdf:Statement; rdf:subject ?sd; rdf:predicate rdf:type; rdf:object ?od.
+										  ?sd rdf:type rdf:Statement; rdf:subject ?s; rdf:predicate ?p; rdf:object ?o.
+										  FILTER((?od=bao:True)||(?od=bao:False))})
+					 }"""]].
+
+
+
+
+####################################################################################################################################################################################
+# SHACL-SPARQL Rules
+####################################################################################################################################################################################
+
+# If the reification of a triple is asserted as an instance of bao:True, then the corresponding triple can be added to the graph.
+[rdf:type sh:NodeShape;
+	sh:targetNode bao:True;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{?s ?p ?o}WHERE{<<?s ?p ?o>> rdf:type $this}"""]].
+
+
+# If the reification of a triple is asserted as false and this reification itself corresponds to an embedded true/false assertion, 
+# the embedded triple with the opposite truth value is added to the knowledge graph (double negation).
+[rdf:type sh:NodeShape;
+	sh:targetNode bao:False;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{?s rdf:type ?rtv}
+						WHERE{<<?s rdf:type ?o>> rdf:type $this.
+							  OPTIONAL{FILTER(?o=bao:True) BIND(bao:False AS ?rtv)} OPTIONAL{FILTER(?o=bao:False) BIND(bao:True AS ?rtv)} FILTER(BOUND(?rtv))}"""]].
+
+
+# If a triple is asserted as both true and false, a contradiction is inferred: the fact that the triple is true contradicts the fact that it is false.
+[rdf:type sh:NodeShape;
+	sh:targetNode bao:False;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{<< <<?s ?p ?o>> rdf:type bao:True>> bao:is-in-contradiction-with << <<?s ?p ?o>> rdf:type bao:False>>}
+						WHERE{<<?s ?p ?o>> rdf:type $this. ?s ?p ?o}"""]].
+
+
+# bao:is-in-contradiction-with is a symmetric property
+[rdf:type sh:NodeShape;
+	sh:targetNode bao:is-in-contradiction-with;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{?o $this ?s}WHERE{?s $this ?o}"""]].
+
+
+# If an instance of bao:Disjunction has a single disjunct, then that disjunct is asserted in the knowledge graph.
+[rdf:type sh:NodeShape;
+	sh:targetClass bao:Disjunction;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{<<?s ?p ?o>> rdf:type ?v}
+						WHERE{$this bao:has-disjunct ?d. NOT EXISTS{$this bao:has-disjunct ?d1. FILTER(?d1!=?d)}
+							  $this bao:has-disjunct << <<?s ?p ?o>> rdf:type ?v>>}"""]].
+
+
+# If either a disjunct of a bao:Disjunction or its negation occurs in the knowledge graph, a new entailed disjunction is created (only once!)
+[rdf:type sh:NodeShape;
+	sh:targetClass bao:Disjunction;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{$this bao:entails-disjunction [rdf:type bao:Disjunction]}
+						WHERE{$this bao:has-disjunct << <<?s ?p ?o>> rdf:type ?v>>.
+							  {<<?s ?p ?o>> rdf:type bao:False}UNION{?s ?p ?o}
+							  NOT EXISTS{$this bao:entails-disjunction [rdf:type bao:Disjunction]}}"""]].
+
+
+# This rule (together with the previous one) implements disjunctive syllogism: if the entailing disjunction specifies a disjunction and (1) neither the disjunct nor its negation occurs in the knowledge graph, and (2) the disjunction does not contain both a disjunct and its negation, then the disjunct is added to the entailed disjunction.
+[rdf:type sh:NodeShape;
+	sh:targetClass bao:Disjunction;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{?d bao:has-disjunct <<<<?se ?pe ?oe>> rdf:type ?ve>>}
+						WHERE{$this bao:entails-disjunction ?d.
+							  $this bao:has-disjunct <<<<?se ?pe ?oe>> rdf:type ?ve>>.
+							  NOT EXISTS{<<?se ?pe ?oe>> rdf:type bao:False. FILTER(?ve=bao:True)} 
+							  NOT EXISTS{?se ?pe ?oe. FILTER(?ve=bao:False)}
+							  NOT EXISTS{$this bao:has-disjunct <<<<?s ?p ?v>> rdf:type bao:False>>. <<?s ?p ?v>> rdf:type bao:False}
+							  NOT EXISTS{$this bao:has-disjunct <<<<?s ?p ?v>> rdf:type bao:True>>. ?s ?p ?v}
+							  NOT EXISTS{$this bao:has-disjunct <<?rt rdf:type ?v>>. $this bao:has-disjunct <<?rt rdf:type ?vn>>. FILTER(STR(?vn)<STR(?v))}}"""]].
+
+
+# If a bao:Disjunction contains both a disjunct and its negation, a new entailed empty disjunction is created (only once!)
+[rdf:type sh:NodeShape;
+	sh:targetClass bao:Disjunction;
+	sh:rule[rdf:type sh:SPARQLRule; sh:prefixes bao:EmbeddedPrefixes;
+		sh:construct """CONSTRUCT{$this bao:entails-disjunction [rdf:type bao:Disjunction]}
+						WHERE{$this bao:has-disjunct <<?rt rdf:type ?v>>.
+							  $this bao:has-disjunct <<?rt rdf:type ?vn>>. FILTER(STR(?vn)<STR(?v))
+							  NOT EXISTS{$this bao:entails-disjunction [rdf:type bao:Disjunction]}}"""]].
+							  
+
