@@ -1,6 +1,6 @@
 ## The Boolean Algebra Ontology (BAO)
 
-This repository contains the source code and resources associated with the paper *"The Boolean Algebra Ontology: Representing and Reasoning with Truth and Falsity in the Semantic Web"*.
+This repository contains the source code and resources associated with the paper *"The Boolean Algebra Ontology: representing and reasoning with truth and falsity in the Semantic Web"*.
 
 The automated reasoner is implemented in the Java class `InferAndValidateThroughSHACL.java`, which can be compiled by running `compile.bat` on Windows or by executing the corresponding Java compilation commands provided in this file on other operating systems.
 
