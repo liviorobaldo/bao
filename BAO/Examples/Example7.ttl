@@ -1,0 +1,29 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# The individuals below are all disjunctions. The set of disjuncts of ":a" is a proper subset of the set of disjuncts of ":b"; therefore, ":b" is identified as redundant and deleted. The disjunctions ":c" and ":d" have the same set of disjuncts. Therefore, it is redundant to keep both; however, neither is preferable to the other. The automated reasoner stipulates that the disjunction with the lexicographically lower identifier is preferred. Consequently, only ":a" and ":c" remain in the inferred knowledge graph, while ":b" and ":d" are identified as redundant and removed.
+
+:a a bao:Disjunction;
+bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:True>>.
+
+:b a bao:Disjunction;
+bao:has-disjunct << <<:Bill :hasWife :Mary>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:True>>.
+
+:c a bao:Disjunction;
+bao:has-disjunct << <<:Jack :hasWife :Mary>> rdf:type bao:False>>;
+bao:has-disjunct << <<:Jack :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Jack :hasWife :Jenny>> rdf:type bao:True>>.
+
+:d a bao:Disjunction;
+bao:has-disjunct << <<:Jack :hasWife :Mary>> rdf:type bao:False>>;
+bao:has-disjunct << <<:Jack :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Jack :hasWife :Jenny>> rdf:type bao:True>>.
+

@@ -1,0 +1,13 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix :   <http://www.example.org#>.
+
+
+# The first triple below asserts that Bill is married to Mary, while the second triple asserts that this fact is false.
+# Therefore, a contradiction is inferred in the knowledge graph.
+
+:Bill :hasWife :Mary.
+<<:Bill :hasWife :Mary>> rdf:type bao:False.
+

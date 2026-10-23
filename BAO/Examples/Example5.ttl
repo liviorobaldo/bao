@@ -1,0 +1,16 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# The individual below is a disjunction that includes both a disjunct and its negation (i.e., A ∨ ¬A): the disjunction states that Jenny is Bill's wife or that she is not. From this, the rule entails T, i.e., an instance of bao:Disjunction without any disjuncts. Both this disjunction and the original one are then deleted by the additional SPARQL rules in the Java code that remove redundant triples; as a result, the inferred knowledge graph is empty. To see the entailed disjunction representing T, comment out the SPARQL rules that remove redundant triples in the Java code.
+
+[a bao:Disjunction;
+bao:has-disjunct << <<:Bill :hasWife :Mary>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:True>>;
+bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:False>>].
+
