@@ -1,0 +1,20 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix :   <http://www.example.org#>.
+
+
+# The first triple below asserts that the statement "Bill is a horse" is false, while the second triple asserts that the statement "Bill is a horse is false" is itself false.
+# By applying the double negation rule to the second triple, the reasoner infers "<<:Bill rdf:type :Horse>> rdf:type bao:True."; that is, the statement "Bill is a horse" is true.
+# Together with the first triple, this leads to a contradiction in the knowledge graph.
+
+<<:Bill rdf:type :Horse>> rdf:type bao:False.
+<< <<:Bill rdf:type :Horse>> rdf:type bao:False>> rdf:type bao:False.
+
+
+# Similarly, the first triple below asserts that the statement "Bill is married to Mary" is false, while the second triple asserts that Bill is married to Mary.
+# By applying double negation, the reasoner infers that the statement "Bill is married to Mary" is true, leading once again to a contradiction in the knowledge graph.
+
+<< <<:Bill :hasWife :Mary>> rdf:type bao:True>> rdf:type bao:False.
+:Bill :hasWife :Mary.

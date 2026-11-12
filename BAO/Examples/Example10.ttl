@@ -1,0 +1,19 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix uno:  <https://w3id.org/unique-name-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+rdfs:Resource rdfs:subClassOf uno:UniqueName.
+
+# The following triple states that "Mary" and "Sue" denote the same real-world entity. However, the previous triple is a shorthand for imposing the Unique Name Assumption on all IRIs defined in the knowledge graph. Therefore, "Mary" and "Sue" cannot denote the same real-world entity, and a contradiction is inferred.
+:Mary uno:sameAs :Sue.
+
+
+
+
+
+

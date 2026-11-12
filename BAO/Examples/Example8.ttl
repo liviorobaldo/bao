@@ -1,0 +1,32 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# The triples below represent the following assertions: {(¬a∨b), (a∨¬c), ¬b, c}, where:
+# - "a" means "Bill's wife is Mary".
+# - "b" means "Bill's wife is Sue".
+# - "c" means "Bill's wife is Jenny".
+# The rules of the Boolean Algebra Ontology derive all pairs of contradictory literals from the above knowledge in two steps:
+# (1) First, Unit Propagation is applied to "(¬a∨b)" and "¬b", from which "¬a" is inferred. At the same time, Unit Propagation is applied to "(a∨¬c)" and "c", from which "a" is inferred.
+# (2) Then, Unit Propagation is applied to "(¬a∨b)" and "a" (which was inferred in step (1)), from which "b" is inferred. Simultaneously, Unit Propagation is applied to "(a∨¬c)" and "¬a" (which was also inferred in step (1)), from which "¬c" is inferred.
+# Since the knowledge graph now contains "a" and "¬a", "b" and "¬b", and "c" and "¬c", contradictions are derived for all three pairs of complementary literals.
+
+# "(¬a∨b)": Bill's wife is not Mary or she is Sue.
+[a bao:Disjunction;
+	bao:has-disjunct << <<:Bill :hasWife :Mary>> rdf:type bao:False>>;
+	bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>].
+
+# "(a∨¬c)": Bill's wife is Mary or she is not Jenny.
+[a bao:Disjunction;
+	bao:has-disjunct << <<:Bill :hasWife :Mary>> rdf:type bao:True>>;
+	bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:False>>].
+
+# "¬b": Bill's wife is not Sue.
+<<:Bill :hasWife :Sue>> rdf:type bao:False.
+
+# "c": Bill's wife is Jenny.
+:Bill :hasWife :Jenny.

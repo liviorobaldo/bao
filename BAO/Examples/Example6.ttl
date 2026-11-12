@@ -1,0 +1,19 @@
+@prefix bao:  <https://w3id.org/boolean-algebra-ontology#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sh:   <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix :   <http://www.example.org#>.
+
+
+# This example contains a disjunction with two disjuncts, but the complements of both occur in the graph.
+# In propositional logic, this corresponds to the pattern (A∨B)∧¬A∧¬B, which is inconsistent.
+# This inconsistency is correctly detected by the rules of the Boolean Algebra Ontology.
+
+[a bao:Disjunction;
+	bao:has-disjunct << <<:Bill :hasWife :Sue>> rdf:type bao:True>>;
+	bao:has-disjunct << <<:Bill :hasWife :Jenny>> rdf:type bao:True>>].
+
+<<:Bill :hasWife :Sue>> rdf:type bao:False.
+<<:Bill :hasWife :Jenny>> rdf:type bao:False.
+
